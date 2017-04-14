@@ -104,11 +104,11 @@ for(j in 4:ncol(OS_exp)){
   Result[i,"median_exp"] <- round(median(tmp_data[,"exp"]),3)
   s.fit<-summary(fit)
   fit.data<-cbind(median=s.fit$table[,"median"],events=s.fit$table[,"events"],n=s.fit$table[,"n.start"])
-  survrate<-matrix(NA,ncol = 1,nrow = 2,col.names="surv_rate")
+  survrate<-matrix(NA,ncol = 1,nrow = 2)
   rownames(survrate)=c("group=High","group=Low")
   colnames(survrate)=c("surv.rate")
-  s.fit$surv[max(grep("TRUE",s.fit$strata=="sex=1"))]->survrate["group=High","surv.rate"]
-  s.fit$surv[max(grep("TRUE",s.fit$strata=="sex=2"))]->survrate["group=Low","surv.rate"]
+  s.fit$surv[max(grep("TRUE",s.fit$strata=="group=High"))]->survrate["group=High","surv.rate"]
+  s.fit$surv[max(grep("TRUE",s.fit$strata=="group=Low"))]->survrate["group=Low","surv.rate"]
   fit.data<-cbind(fit.data,surv.rate=survrate)
   if(is.na(fit.data["group=High","median"])|is.na(fit.data["group=Low","median"])){
     if(fit.data["group=High","surv.rate"]<fit.data["group=Low","surv.rate"] ){Result[i, "prognosis"]="poor"}
