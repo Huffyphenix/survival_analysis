@@ -104,15 +104,17 @@ for(j in 4:ncol(OS_exp)){
   Result[i,"median_exp"] <- round(median(tmp_data[,"exp"]),3)
   s.fit<-summary(fit)
   fit.data<-cbind(median=s.fit$table[,"median"],events=s.fit$table[,"events"],n=s.fit$table[,"n.start"])
-  survrate<-(fit.data[,"n"]-fit.data[,"events"])/fit.data[,"n"]
+  survrate<-matrix(NA,ncol = 1,nrow = 2,col.names="surv_rate")
+  rownames(survrate)=c("group=High","group=Low")
+  colnames(survrate)=c("surv.rate")
+  s.fit$surv[max(grep("TRUE",s.fit$strata=="sex=1"))]->survrate["group=High","surv.rate"]
+  s.fit$surv[max(grep("TRUE",s.fit$strata=="sex=2"))]->survrate["group=Low","surv.rate"]
   fit.data<-cbind(fit.data,surv.rate=survrate)
-  if(is.na(fit.data["group=High","median"]) | is.na(fit.data["group=Low","median"])){
+  if(is.na(fit.data["group=High","median"])|is.na(fit.data["group=Low","median"])){
     if(fit.data["group=High","surv.rate"]<fit.data["group=Low","surv.rate"] ){Result[i, "prognosis"]="poor"}
     if(fit.data["group=High","surv.rate"]>fit.data["group=Low","surv.rate"] ){Result[i, "prognosis"]="good"}}else{
-    if(fit.data["group=High","median"]<fit.data["group=Low","median"] & fit.data["group=High","surv.rate"]<fit.data["group=Low","surv.rate"] ){Result[i, "prognosis"]="poor"}
-    if(fit.data["group=High","median"]>fit.data["group=Low","median"] & fit.data["group=High","surv.rate"]>fit.data["group=Low","surv.rate"] ){Result[i, "prognosis"]="good"}
-#    if(fit.data["group=High","median"]<fit.data["group=Low","median"]){Result[i, "prognosis"]="poor"}
-#    if(fit.data["group=High","median"]>fit.data["group=Low","median"]){Result[i, "prognosis"]="good"}
+    if(fit.data["group=High","median"]<fit.data["group=Low","median"]){Result[i, "prognosis"]="poor"}
+    if(fit.data["group=High","median"]>fit.data["group=Low","median"]){Result[i, "prognosis"]="good"}
   }
   Result[i,"low_sur_median"]=fit.data["group=Low","median"]
   Result[i,"high_sur_median"]=fit.data["group=High","median"]
