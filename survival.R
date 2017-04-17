@@ -125,10 +125,10 @@ for(j in 4:ncol(OS_exp)){
   if(as.numeric(as.character(Result[i, c("KMp")])) <= pvalue){
     if(!is.na(Result[i,"prognosis"])){
     if(Result[i, "prognosis"]=="good"){
-    pdf_name<-paste(args[7],"/",args[3],"/","PDF/good_prognosis","/",args[3],"_",args[4],"_",strsplit(colnames(OS_exp)[j],split = "\\|")[[1]][1],".",strsplit(colnames(OS_exp)[j],split = "\\|")[[1]][2],".pdf",sep="")}else{
+    pdf_name<-paste(args[7],"/",args[3],"/","PDF/good_prognosis","/",args[3],"_",args[4],"_",strsplit(colnames(OS_exp)[j],split = "\\|")[[1]][1],".",strsplit(colnames(OS_exp)[j],split = "\\|")[[1]][2],".pdf",sep="")}else if(Result[i, "prognosis"]=="poor"){
     pdf_name<-paste(args[7],"/",args[3],"/","PDF/poor_prognosis","/",args[3],"_",args[4],"_",strsplit(colnames(OS_exp)[j],split = "\\|")[[1]][1],".",strsplit(colnames(OS_exp)[j],split = "\\|")[[1]][2],".pdf",sep="")}}else{
     pdf_name<-paste(args[7],"/",args[3],"/","PDF","/",args[3],"_",args[4],"_",strsplit(colnames(OS_exp)[j],split = "\\|")[[1]][1],".",strsplit(colnames(OS_exp)[j],split = "\\|")[[1]][2],".pdf",sep="")}
-    pdf(pdf_name,width=8,height = 6)
+    png(pdf_name,width=8,height = 6)
     p_signif_list<-c(p_signif_list,colnames(OS_exp)[j])
     plot(fit,col=c("red","green"),lty=1,lwd=2,mark.time=TRUE,
          main=paste("Kaplan-Meier Curves of ",rownames(Result)[i]," in ",args[3],sep=""),
