@@ -104,16 +104,20 @@ for(j in 4:ncol(OS_exp)){
   Result[i,"median_exp"] <- round(median(tmp_data[,"exp"]),3)
   s.fit<-summary(fit)
   fit.data<-cbind(median=s.fit$table[,"median"],events=s.fit$table[,"events"],n=s.fit$table[,"n.start"])
-  survrate<-(fit.data[,"n"]-fit.data[,"events"])/fit.data[,"n"]
+  survrate<-matrix(NA,ncol = 1,nrow = 2)
+  rownames(survrate)=c("group=High","group=Low")
+  colnames(survrate)=c("surv.rate")
+  s.fit$surv[max(grep("TRUE",s.fit$strata=="group=High"))]->survrate["group=High","surv.rate"]
+  s.fit$surv[max(grep("TRUE",s.fit$strata=="group=Low"))]->survrate["group=Low","surv.rate"]
   fit.data<-cbind(fit.data,surv.rate=survrate)
-  if(is.na(fit.data["group=High","median"]) | is.na(fit.data["group=Low","median"])){
-    if(fit.data["group=High","surv.rate"]<fit.data["group=Low","surv.rate"] ){Result[i, "prognosis"]="poor"}
-    if(fit.data["group=High","surv.rate"]>fit.data["group=Low","surv.rate"] ){Result[i, "prognosis"]="good"}}else{
-    if(fit.data["group=High","median"]<fit.data["group=Low","median"] & fit.data["group=High","surv.rate"]<fit.data["group=Low","surv.rate"] ){Result[i, "prognosis"]="poor"}
-    if(fit.data["group=High","median"]>fit.data["group=Low","median"] & fit.data["group=High","surv.rate"]>fit.data["group=Low","surv.rate"] ){Result[i, "prognosis"]="good"}
-#    if(fit.data["group=High","median"]<fit.data["group=Low","median"]){Result[i, "prognosis"]="poor"}
-#    if(fit.data["group=High","median"]>fit.data["group=Low","median"]){Result[i, "prognosis"]="good"}
-  }
+  if(!is.na(fit.data["group=High","median"]) & !is.na(fit.data["group=Low","median"])){
+    if(fit.data["group=High","median"]<fit.data["group=Low","median"]){Result[i, "prognosis"]="poor"}
+    if(fit.data["group=High","median"]>fit.data["group=Low","median"]){Result[i, "prognosis"]="good"}
+    }else if(!is.na(fit.data["group=High","surv.rate"]) & !is.na(fit.data["group=Low","surv.rate"])){
+    if(fit.data["group=High","surv.rate"]<fit.data["group=Low","surv.rate"]){Result[i,"prognosis"]="poor"}
+    if(fit.data["group=High","surv.rate"]>fit.data["group=Low","surv.rate"]){Result[i,"prognosis"]="good"}
+    }else{
+    Result[i, "prognosis"]="NOTSURE"}
   Result[i,"low_sur_median"]=fit.data["group=Low","median"]
   Result[i,"high_sur_median"]=fit.data["group=High","median"]
   Result[i,"low_surv.rate"]=round(fit.data["group=Low","surv.rate"],3)
@@ -121,16 +125,18 @@ for(j in 4:ncol(OS_exp)){
   if(as.numeric(as.character(Result[i, c("KMp")])) <= pvalue){
     if(!is.na(Result[i,"prognosis"])){
     if(Result[i, "prognosis"]=="good"){
-    pdf_name<-paste(args[7],"/",args[3],"/","PDF/good_prognosis","/",args[3],"_",args[4],"_",strsplit(colnames(OS_exp)[j],split = "\\|")[[1]][1],".",strsplit(colnames(OS_exp)[j],split = "\\|")[[1]][2],".pdf",sep="")}else{
+    pdf_name<-paste(args[7],"/",args[3],"/","PDF/good_prognosis","/",args[3],"_",args[4],"_",strsplit(colnames(OS_exp)[j],split = "\\|")[[1]][1],".",strsplit(colnames(OS_exp)[j],split = "\\|")[[1]][2],".pdf",sep="")}else if(Result[i, "prognosis"]=="poor"){
     pdf_name<-paste(args[7],"/",args[3],"/","PDF/poor_prognosis","/",args[3],"_",args[4],"_",strsplit(colnames(OS_exp)[j],split = "\\|")[[1]][1],".",strsplit(colnames(OS_exp)[j],split = "\\|")[[1]][2],".pdf",sep="")}}else{
     pdf_name<-paste(args[7],"/",args[3],"/","PDF","/",args[3],"_",args[4],"_",strsplit(colnames(OS_exp)[j],split = "\\|")[[1]][1],".",strsplit(colnames(OS_exp)[j],split = "\\|")[[1]][2],".pdf",sep="")}
-    pdf(pdf_name,width=8,height = 6)
+    png(pdf_name,width=8,height = 6)
     p_signif_list<-c(p_signif_list,colnames(OS_exp)[j])
     plot(fit,col=c("red","green"),lty=1,lwd=2,mark.time=TRUE,
          main=paste("Kaplan-Meier Curves of ",rownames(Result)[i]," in ",args[3],sep=""),
          xlab = "Survival in months",ylab="Survival rate",cex.lab=1.3,cex.axis=1.2)
     legend("bottomleft",c(paste(levels(as.factor(tmp_data$group))," n=",fit$n,sep="")),
                         col=c("red","green"),lty=c(1,1,0),bty="n",lwd=3)
+    legend("topright",c(paste("logrank P =",signif(as.numeric(Result[i, c("KMp")]),digits = 2),
+                p_signif(as.numeric(Result[i, c("KMp")]))),paste("Prognosis=",Result[i, "prognosis"])),lty=c(1,1,0),bty="n",lwd=3)
     text(max(tmp_data$OS)-25,1,paste("logrank P =",signif(as.numeric(Result[i, c("KMp")]),digits = 2),p_signif(as.numeric(Result[i, c("KMp")])),sep=" "),cex=1)
     dev.off()
 }}
