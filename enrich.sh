@@ -1,0 +1,1 @@
+python /project/zhangq/tissue_special/analysis/scripts/hyper_test.py -e testis_gene.lst -b /project/zhangq/tissue_special/analysis/scripts/test/human/KO_human_zq_20161216kegg_version.desc -c 3 -f 0.1 -o testis_gene.lst.enrich 
